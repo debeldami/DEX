@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.13;
-import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol';
+pragma solidity ^0.8.13;
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
+
 
 contract Dex{
     struct Token{
@@ -25,10 +26,24 @@ contract Dex{
         tokenList.push(ticker);
     }
 
-    function deposit(uint amount, bytes32 ticker) external{
+    function deposit(uint amount, bytes32 ticker) external tokenExist(ticker){
         IERC20(token[ticker].tokenAddress).transferFrom(
             msg.sender,
             address(this),
+            amount
+        );
+
+        tradersBalances[msg.sender][ticker] += amount;
+    }
+
+
+    function withdraw (uint amount, bytes32 ticker) external tokenExist(ticker){
+        require(amount <= tradersBalances[msg.sender][ticker], "balance too low");
+
+        tradersBalances[msg.sender][ticker] -= amount;
+
+        IERC20(token[ticker].tokenAddress).transfer(
+            msg.sender,
             amount
         );
     }
@@ -38,7 +53,7 @@ contract Dex{
         _;
     }
 
-     modifier tokenExist(bytes32 ticker){
+    modifier tokenExist(bytes32 ticker){
         require(token[ticker].tokenAddress != address(0), "token does not exist");
         _;
     }
