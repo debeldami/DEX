@@ -3,18 +3,37 @@ pragma solidity ^0.8.13;
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
 
 contract Dex{
+    enum Side {
+        BUY,
+        Sell
+    }
+
     struct Token{
         bytes32 ticker;
         address tokenAddress;
+    }
+
+    struct order {
+        uint id;
+        Side side;
+        bytes32 ticker;
+        uint amount;
+        uint filled;
+        uint price;
+        uint date;
     }
 
     mapping(bytes32 => Token) public token;
 
     mapping(address => mapping(bytes32 => uint)) public tradersBalances;
 
+    mapping(bytes32 => mapping(uint => Order[])) public orderBook;
+
     bytes32[] public tokenList;
 
     address public admin;
+
+    uint public nextOrderId; 
 
     constructor(){
         admin = msg.sender;
@@ -45,6 +64,10 @@ contract Dex{
             msg.sender,
             amount
         );
+    }
+
+    function createLimitOrder(bytes32 ticker, uint amount, uint price, Side side) external{
+        require(ticker != bytes(''));
     }
 
     modifier onlyAdmin{
