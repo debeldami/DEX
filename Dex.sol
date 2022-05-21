@@ -14,7 +14,7 @@ contract Dex{
         address tokenAddress;
     }
 
-    struct order {
+    struct Order {
         uint id;
         Side side;
         bytes32 ticker;
@@ -36,7 +36,7 @@ contract Dex{
 
     uint public nextOrderId; 
 
-    uint constant DAI = bytes('DAI');
+    bytes32 constant DAI = bytes32('DAI');
 
     constructor(){
         admin = msg.sender;
@@ -81,6 +81,24 @@ contract Dex{
 
             require(tradersBalances[msg.sender][DAI] >= amount * price, "DAI balance too low");
             
+        }
+
+        Order[] storage order = orderBook[ticker][uint(side)];
+        order.push(Order( nextOrderId, side, ticker, amount, 0, price, block.timestamp));
+
+        uint i = ordes.length - 1;
+        while(i > 0){
+            if(side == Side.BUY && orders[i-1] > orders[i].price){
+                break;
+            }
+            if(side == Side.SELL && orders[i-1] < orders[i].price){
+                break;
+            }
+
+            Order memory order = orders[i-1];
+            orders[i-1] = orders[i];
+            orders[i] = order;
+            i--;
         }
     }
 
