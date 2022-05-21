@@ -3,9 +3,10 @@ pragma solidity ^0.8.13;
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
 
 contract Dex{
+
     enum Side {
         BUY,
-        Sell
+        SELL
     }
 
     struct Token{
@@ -34,6 +35,8 @@ contract Dex{
     address public admin;
 
     uint public nextOrderId; 
+
+    uint constant DAI = bytes('DAI');
 
     constructor(){
         admin = msg.sender;
@@ -67,7 +70,18 @@ contract Dex{
     }
 
     function createLimitOrder(bytes32 ticker, uint amount, uint price, Side side) external{
-        require(ticker != bytes(''));
+
+        require(ticker != DAI, "Cannot trade DAI");
+
+        if(side == Side.SELL){
+
+            require(tradersBalances[msg.sender][ticker] >= amount, "token balance too low");
+
+        }else{
+
+            require(tradersBalances[msg.sender][DAI] >= amount * price, "DAI balance too low");
+            
+        }
     }
 
     modifier onlyAdmin{
