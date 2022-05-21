@@ -16,6 +16,7 @@ contract Dex{
 
     struct Order {
         uint id;
+        address trader;
         Side side;
         bytes32 ticker;
         uint amount;
@@ -36,7 +37,20 @@ contract Dex{
 
     uint public nextOrderId; 
 
+    uint public nextTradeId;
+
     bytes32 constant DAI = bytes32('DAI');
+
+    event NewTrade(
+        uint tradeId,
+        uint orderId,
+        bytes32 indexed ticker,
+        address indexed trader1,
+        address indexed trader2,
+        uint amount,
+        uint price,
+        uint date
+    );
 
     constructor(){
         admin = msg.sender;
@@ -69,9 +83,7 @@ contract Dex{
         );
     }
 
-    function createLimitOrder(bytes32 ticker, uint amount, uint price, Side side) external{
-
-        require(ticker != DAI, "Cannot trade DAI");
+    function createLimitOrder(bytes32 ticker, uint amount, uint price, Side side) external tokenIsNotDai(ticker){
 
         if(side == Side.SELL){
 
@@ -83,15 +95,17 @@ contract Dex{
             
         }
 
-        Order[] storage order = orderBook[ticker][uint(side)];
-        order.push(Order( nextOrderId, side, ticker, amount, 0, price, block.timestamp));
+        Order[] storage orders = orderBook[ticker][uint(side)];
 
-        uint i = ordes.length - 1;
+        orders.push(Order( nextOrderId, msg.sender, side, ticker, amount, 0, price, block.timestamp));
+
+        uint i = orders.length - 1;
+
         while(i > 0){
-            if(side == Side.BUY && orders[i-1] > orders[i].price){
+            if(side == Side.BUY && orders[i-1].price > orders[i].price){
                 break;
             }
-            if(side == Side.SELL && orders[i-1] < orders[i].price){
+            if(side == Side.SELL && orders[i-1].price < orders[i].price){
                 break;
             }
 
@@ -99,7 +113,82 @@ contract Dex{
             orders[i-1] = orders[i];
             orders[i] = order;
             i--;
+            nextOrderId++;
         }
+
+    }
+
+    function createMarketOrder(bytes32 ticker, uint amount, Side side) external tokenExist(ticker) tokenIsNotDai(ticker){
+        if(side == Side.SELL){
+
+            require(tradersBalances[msg.sender][ticker] >= amount, "token balance too low");
+
+        }
+
+        Order[] storage orders = orderBook[ticker][uint(side == Side.BUY ? Side.SELL : Side.BUY)];
+
+        uint i;
+
+        uint remaining = amount;
+
+        while(i < orders.length && remaining > 0){
+
+            uint available = orders[i].amount - orders[i].filled;
+
+            uint matched = remaining > available ? available : remaining;
+
+            remaining -= matched;
+
+            orders[i].filled = matched;
+
+            emit NewTrade( nextTradeId, orders[i].id, ticker, orders[i].trader, msg.sender, orders[i].amount, orders[i].price, block.timestamp);
+
+            if(side == Side.SELL){
+
+            tradersBalances[msg.sender][ticker] -= matched;
+
+            tradersBalances[msg.sender][DAI] += matched * orders[i].price;
+
+            tradersBalances[orders[i].trader][ticker] += matched;
+
+            tradersBalances[orders[i].trader][DAI] -= matched * orders[i].price;
+
+            }
+
+            if(side == Side.BUY){
+
+            require(tradersBalances[msg.sender][DAI] >= matched * orders[i].price, "dai balance too low" );
+
+            tradersBalances[msg.sender][ticker] += matched;
+
+            tradersBalances[msg.sender][DAI] -= matched * orders[i].price;
+
+            tradersBalances[orders[i].trader][ticker] -= matched;
+
+            tradersBalances[orders[i].trader][DAI] += matched * orders[i].price;
+
+            }
+            nextTradeId++;
+            i++;
+        }
+
+        i = 0;
+
+        while(i < orders.length && orders[i].filled == orders[i].amount){
+            for(uint j = i; j < orders.length - 1; j++){
+                orders[j] == orders[j + 1];
+            }
+
+            orders.pop();
+            i++;
+        }
+
+        
+    }
+
+    modifier tokenIsNotDai(bytes32 ticker){
+        require(ticker != DAI, "Cannot trade DAI");
+        _;
     }
 
     modifier onlyAdmin{
