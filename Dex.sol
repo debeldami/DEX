@@ -99,7 +99,7 @@ contract Dex{
 
         orders.push(Order( nextOrderId, msg.sender, side, ticker, amount, 0, price, block.timestamp));
 
-        uint i = orders.length - 1;
+        uint i = orders.length > 0 ? orders.length - 1 : 0;
 
         while(i > 0){
             if(side == Side.BUY && orders[i-1].price > orders[i].price){
@@ -176,7 +176,7 @@ contract Dex{
 
         while(i < orders.length && orders[i].filled == orders[i].amount){
             for(uint j = i; j < orders.length - 1; j++){
-                orders[j] == orders[j + 1];
+                orders[j] = orders[j + 1];
             }
 
             orders.pop();
