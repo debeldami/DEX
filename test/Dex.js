@@ -62,7 +62,7 @@ contract('Dex', (accounts) => {
     assert(balance === amount.toString());
   });
 
-  It('should not deposit tokens', async () => {
+  it('should not deposit tokens', async () => {
     const amount = web3.utils.toWei('1000');
 
     await expectRevert(() => {
