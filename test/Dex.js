@@ -1,4 +1,4 @@
-const expectRevert = require("@openzeppelin/test-helpers/src/expectRevert");
+const expectRevert = require('@openzeppelin/test-helpers/src/expectRevert');
 
 const Dai = artifacts.require('mocks/Dai.sol');
 const Rep = artifacts.require('mocks/Rep.sol');
@@ -62,16 +62,18 @@ contract('Dex', (accounts) => {
     assert(balance === amount.toString());
   });
 
-  It('should not deposit tokens', async () =>{
-
+  It('should not deposit tokens', async () => {
     const amount = web3.utils.toWei('1000');
 
-    await expectRevert( ()=>{
-      await dex.deposit(amount, ZRX, {
-        from: trader1,
-      }, "token does not exist");
-    })
-  })
-
-
+    await expectRevert(() => {
+      dex.deposit(
+        amount,
+        ZRX,
+        {
+          from: trader1,
+        },
+        'token does not exist'
+      );
+    });
+  });
 });
