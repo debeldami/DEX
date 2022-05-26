@@ -1,3 +1,5 @@
+const expectRevert = require("@openzeppelin/test-helpers/src/expectRevert");
+
 const Dai = artifacts.require('mocks/Dai.sol');
 const Rep = artifacts.require('mocks/Rep.sol');
 const Bat = artifacts.require('mocks/Bat.sol');
@@ -24,27 +26,52 @@ contract('Dex', (accounts) => {
     dex = await Dex.new();
 
     await Promise.all([
-      dai.addToken(DAI, dai.address),
-      rep.addToken(REP, dai.address),
-      bat.addToken(BAT, dai.address),
-      zrx.addToken(ZRX, dai.address),
+      dex.addToken(DAI, dai.address),
+      dex.addToken(REP, dai.address),
+      dex.addToken(BAT, dai.address),
+      // dex.addToken(ZRX, dai.address),
     ]);
 
     const amount = web3.utils.toWei('1000');
 
     const seedTokenBalnce = async (token, trader) => {
-      await token._mint(trader, amount);
+      await token.faucet(trader, amount);
       await token.approve(dex.address, amount, {
         from: trader,
       });
-
-      await Promise.all(
-        [dai, rep, bat, zrx].map((token) => seedTokenBalnce(token, trader1))
-      );
-
-      await Promise.all(
-        [dai, rep, bat, zrx].map((token) => seedTokenBalnce(token, trader2))
-      );
     };
+
+    await Promise.all(
+      [dai, rep, bat, zrx].map((token) => seedTokenBalnce(token, trader1))
+    );
+
+    await Promise.all(
+      [dai, rep, bat, zrx].map((token) => seedTokenBalnce(token, trader2))
+    );
   });
+
+  it('should deposit tokens', async () => {
+    const amount = web3.utils.toWei('1000');
+
+    await dex.deposit(amount, DAI, {
+      from: trader1,
+    });
+
+    const balance = (await dex.tradersBalances(trader1, DAI)).toString();
+
+    assert(balance === amount.toString());
+  });
+
+  It('should not deposit tokens', async () =>{
+
+    const amount = web3.utils.toWei('1000');
+
+    await expectRevert( ()=>{
+      await dex.deposit(amount, ZRX, {
+        from: trader1,
+      }, "token does not exist");
+    })
+  })
+
+
 });
