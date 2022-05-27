@@ -1,10 +1,16 @@
 const expectRevert = require('@openzeppelin/test-helpers/src/expectRevert');
+const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 
 const Dai = artifacts.require('mocks/Dai.sol');
 const Rep = artifacts.require('mocks/Rep.sol');
 const Bat = artifacts.require('mocks/Bat.sol');
 const Zrx = artifacts.require('mocks/Zrx.sol');
 const Dex = artifacts.require('Dex');
+
+const SIDE = {
+  BUY: 0,
+  SELL: 1,
+};
 
 contract('Dex', (accounts) => {
   let [trader1, trader2] = [accounts[1], accounts[2]];
@@ -118,5 +124,27 @@ contract('Dex', (accounts) => {
       }),
       'balance too low'
     );
+  });
+
+  it('should create limit order', async () => {
+    const depositAmount = web3.utils.toWei('100');
+
+    await dex.deposit(depositAmount, DAI, {
+      from: trader1,
+    });
+
+    await dex.createLimitOrder(BAT, web3.utils.toWei('10'), 10, SIDE.BUY, {
+      from: trader1,
+    });
+
+    const buyOrder = await dex.getOrders(BAT, SIDE.BUY);
+    const sellOrder = await dex.getOrders(BAT, SIDE.SELL);
+
+    assert(buyOrder.length === 1);
+    assert(buyOrder[0].trader === trader1);
+    assert(buyOrder[0].ticker === web3.utils.padRight(BAT, 64));
+    assert(buyOrder[0].price === '10');
+    assert(buyOrder[0].amount === web3.utils.toWei('10'));
+    assert(sellOrder.length === 0);
   });
 });
