@@ -211,7 +211,7 @@ contract Dex{
 
                 orders.pop(); 
 
-                tradersBalances[msg.sender][ticker] += orders[i].amount;
+                tradersBalances[msg.sender][ticker] += CanceledOrders[i].amount;
 
                 emit CancelOrder( id, ticker, "order was successfully cancelled");
 
