@@ -161,8 +161,8 @@ contract('Dex', (accounts) => {
     sellOrder = await dex.getOrders(BAT, SIDE.SELL);
 
     assert(buyOrder.length === 2);
-    assert(buyOrder[0].trader === trader1);
-    assert(buyOrder[1].trader === trader2);
+    assert(buyOrder[0].trader === trader2);
+    assert(buyOrder[1].trader === trader1);
     assert(sellOrder.length === 0);
 
     await dex.createLimitOrder(BAT, web3.utils.toWei('10'), 9, SIDE.BUY, {
@@ -173,8 +173,8 @@ contract('Dex', (accounts) => {
     sellOrder = await dex.getOrders(BAT, SIDE.SELL);
 
     assert(buyOrder.length === 3);
-    assert(buyOrder[0].trader === trader1);
-    assert(buyOrder[1].trader === trader2);
+    assert(buyOrder[0].trader === trader2);
+    assert(buyOrder[1].trader === trader1);
     assert(buyOrder[2].trader === trader2);
     assert(buyOrder[2].price === '9');
     assert(sellOrder.length === 0);

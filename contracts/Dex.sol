@@ -120,9 +120,8 @@ contract Dex{
             orders[i-1] = orders[i];
             orders[i] = order;
             i--;
-            nextOrderId++;
         }
-
+        nextOrderId++;
     }
 
     function createMarketOrder(bytes32 ticker, uint amount, Side side) external tokenExist(ticker) tokenIsNotDai(ticker) cancelChecker(side){
