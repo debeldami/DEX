@@ -1,5 +1,4 @@
 const expectRevert = require('@openzeppelin/test-helpers/src/expectRevert');
-const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 
 const Dai = artifacts.require('mocks/Dai.sol');
 const Rep = artifacts.require('mocks/Rep.sol');
