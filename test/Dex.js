@@ -137,14 +137,46 @@ contract('Dex', (accounts) => {
       from: trader1,
     });
 
-    const buyOrder = await dex.getOrders(BAT, SIDE.BUY);
-    const sellOrder = await dex.getOrders(BAT, SIDE.SELL);
+    let buyOrder = await dex.getOrders(BAT, SIDE.BUY);
+    let sellOrder = await dex.getOrders(BAT, SIDE.SELL);
 
     assert(buyOrder.length === 1);
     assert(buyOrder[0].trader === trader1);
     assert(buyOrder[0].ticker === web3.utils.padRight(BAT, 64));
     assert(buyOrder[0].price === '10');
     assert(buyOrder[0].amount === web3.utils.toWei('10'));
+    assert(sellOrder.length === 0);
+
+    const depositAmount1 = web3.utils.toWei('200');
+
+    await dex.deposit(depositAmount1, DAI, {
+      from: trader2,
+    });
+
+    await dex.createLimitOrder(BAT, web3.utils.toWei('10'), 11, SIDE.BUY, {
+      from: trader2,
+    });
+
+    buyOrder = await dex.getOrders(BAT, SIDE.BUY);
+    sellOrder = await dex.getOrders(BAT, SIDE.SELL);
+
+    assert(buyOrder.length === 2);
+    assert(buyOrder[0].trader === trader1);
+    assert(buyOrder[1].trader === trader2);
+    assert(sellOrder.length === 0);
+
+    await dex.createLimitOrder(BAT, web3.utils.toWei('10'), 9, SIDE.BUY, {
+      from: trader2,
+    });
+
+    buyOrder = await dex.getOrders(BAT, SIDE.BUY);
+    sellOrder = await dex.getOrders(BAT, SIDE.SELL);
+
+    assert(buyOrder.length === 3);
+    assert(buyOrder[0].trader === trader1);
+    assert(buyOrder[1].trader === trader2);
+    assert(buyOrder[2].trader === trader2);
+    assert(buyOrder[2].price === '9');
     assert(sellOrder.length === 0);
   });
 });

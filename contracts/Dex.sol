@@ -252,7 +252,7 @@ contract Dex{
     }
 
     modifier cancelChecker(Side side){
-        require(side == Side.CANCEL, "invalid transaction: cancel checker");
+        require(side != Side.CANCEL, "invalid transaction: cancel checker");
         _;
     }
 }
