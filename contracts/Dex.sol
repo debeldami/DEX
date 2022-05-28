@@ -6,7 +6,8 @@ contract Dex{
 
     enum Side {
         BUY,
-        SELL
+        SELL,
+        CANCEL
     }
 
     struct Token{
@@ -52,6 +53,12 @@ contract Dex{
         uint date
     );
 
+    event CancelOrder(
+        uint orderId,
+        bytes32 ticker,
+        string message
+    );
+
     constructor(){
         admin = msg.sender;
     }
@@ -83,7 +90,7 @@ contract Dex{
         );
     }
 
-    function createLimitOrder(bytes32 ticker, uint amount, uint price, Side side) external tokenIsNotDai(ticker){
+    function createLimitOrder(bytes32 ticker, uint amount, uint price, Side side) external tokenIsNotDai(ticker) cancelChecker(side){
 
         if(side == Side.SELL){
 
@@ -118,7 +125,7 @@ contract Dex{
 
     }
 
-    function createMarketOrder(bytes32 ticker, uint amount, Side side) external tokenExist(ticker) tokenIsNotDai(ticker){
+    function createMarketOrder(bytes32 ticker, uint amount, Side side) external tokenExist(ticker) tokenIsNotDai(ticker) cancelChecker(side){
         if(side == Side.SELL){
 
             require(tradersBalances[msg.sender][ticker] >= amount, "token balance too low");
@@ -182,8 +189,36 @@ contract Dex{
             orders.pop();
             i++;
         }
-
         
+    }
+
+    function cancelOrder(bytes32 ticker, Side side, uint id) external cancelChecker(side){
+
+        Order[] storage orders = orderBook[ticker][uint(side)];
+        Order[] storage CanceledOrders = orderBook[ticker][uint(Side.CANCEL)];
+
+        for(uint i = 0; i < orders.length; i++){
+            if(orders[i].id == id){
+                require(orders[i].trader == msg.sender, "not authorized to cancel order");
+
+                orders[i].side = Side.CANCEL;
+
+                CanceledOrders.push(orders[i]);
+
+                for(uint j = i; j < orders.length - 1; j++){
+                    orders[j] = orders[j + 1];      
+                 }
+
+                orders.pop(); 
+
+                tradersBalances[msg.sender][ticker] += orders[i].amount;
+
+                emit CancelOrder( id, ticker, "order was successfully cancelled");
+
+            }
+        }
+
+        emit CancelOrder( id, ticker, "order does not exist");
     }
 
     function getOrders( bytes32 ticker, Side side) external view returns(Order[] memory) {
@@ -213,6 +248,11 @@ contract Dex{
 
     modifier tokenExist(bytes32 ticker){
         require(token[ticker].tokenAddress != address(0), "token does not exist");
+        _;
+    }
+
+    modifier cancelChecker(Side side){
+        require(side == Side.CANCEL, "invalid transaction: cancel checker");
         _;
     }
 }
