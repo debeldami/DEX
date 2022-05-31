@@ -178,4 +178,28 @@ contract('Dex', (accounts) => {
     assert(buyOrder[2].price === '9');
     assert(sellOrder.length === 0);
   });
+
+  it('should not create a new order if token do not exist', async () => {
+    const depositAmount = web3.utils.toWei('100');
+
+    await dex.deposit(depositAmount, DAI, {
+      from: trader2,
+    });
+
+    await expectRevert(
+      dex.createLimitOrder(ZRX, web3.utils.toWei('10'), 9, SIDE.BUY, {
+        from: trader2,
+      }),
+      'token does not exist'
+    );
+  });
+
+  it('should not create a limit order if token is DAI', async () => {
+    await expectRevert(
+      dex.createLimitOrder(DAI, web3.utils.toWei('10'), 9, SIDE.BUY, {
+        from: trader2,
+      }),
+      'Cannot trade DAI'
+    );
+  });
 });

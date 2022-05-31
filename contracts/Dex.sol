@@ -90,7 +90,7 @@ contract Dex{
         );
     }
 
-    function createLimitOrder(bytes32 ticker, uint amount, uint price, Side side) external tokenIsNotDai(ticker) cancelChecker(side){
+    function createLimitOrder(bytes32 ticker, uint amount, uint price, Side side) external tokenIsNotDai(ticker) tokenExist(ticker) cancelChecker(side){
 
         if(side == Side.SELL){
 
