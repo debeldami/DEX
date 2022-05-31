@@ -202,4 +202,34 @@ contract('Dex', (accounts) => {
       'Cannot trade DAI'
     );
   });
+
+  it('should not create a limit order if token is too low', async () => {
+    const depositAmount = web3.utils.toWei('99');
+
+    await dex.deposit(depositAmount, BAT, {
+      from: trader2,
+    });
+
+    await expectRevert(
+      dex.createLimitOrder(BAT, web3.utils.toWei('100'), 9, SIDE.SELL, {
+        from: trader2,
+      }),
+      'token balance too low'
+    );
+  });
+
+  it('should not create a limit order if DAI balance is too low', async () => {
+    const depositAmount = web3.utils.toWei('99');
+
+    await dex.deposit(depositAmount, DAI, {
+      from: trader2,
+    });
+
+    await expectRevert(
+      dex.createLimitOrder(BAT, web3.utils.toWei('10'), 10, SIDE.BUY, {
+        from: trader2,
+      }),
+      'DAI balance too low'
+    );
+  });
 });
