@@ -1,3 +1,4 @@
+const { assertion } = require('@openzeppelin/test-helpers/src/expectRevert');
 const expectRevert = require('@openzeppelin/test-helpers/src/expectRevert');
 
 const Dai = artifacts.require('mocks/Dai.sol');
@@ -304,5 +305,24 @@ contract('Dex', (accounts) => {
       }),
       'token does not exist'
     );
+  });
+
+  it('should cancel order', async () => {
+    await dex.deposit(web3.utils.toWei('100'), DAI, { from: trader1 });
+
+    await dex.createLimitOrder(REP, web3.utils.toWei('10'), 10, SIDE.BUY, {
+      from: trader1,
+    });
+
+    const ordersB = await dex.getOrders(REP, SIDE.BUY);
+
+    await dex.cancelOrder(REP, SIDE.BUY, 0, {
+      from: trader1,
+    });
+
+    const ordersA = await dex.getOrders(REP, SIDE.BUY);
+
+    assert(ordersB.length >= ordersA.length);
+    assert(ordersA.length === 0);
   });
 });

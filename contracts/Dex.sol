@@ -99,7 +99,7 @@ contract Dex{
         }else{
 
             require(tradersBalances[msg.sender][DAI] >= amount * price, "DAI balance too low");
-            
+
         }
 
         Order[] storage orders = orderBook[ticker][uint(side)];
@@ -208,9 +208,7 @@ contract Dex{
                     orders[j] = orders[j + 1];      
                  }
 
-                orders.pop(); 
-
-                tradersBalances[msg.sender][ticker] += CanceledOrders[i].amount;
+                orders.pop();
 
                 emit CancelOrder( id, ticker, "order was successfully cancelled");
             break;
