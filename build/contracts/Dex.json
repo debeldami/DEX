@@ -39102,14 +39102,95 @@
   },
   "networks": {
     "5777": {
-      "events": {},
+      "events": {
+        "0xb61471e1d4ae934f4d3b9f22fec64d44ab69ae3ab73d829857f5cb45f2a313f4": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "orderId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "ticker",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "message",
+              "type": "string"
+            }
+          ],
+          "name": "CancelOrder",
+          "type": "event"
+        },
+        "0xdb0c486e680ba8026643e6a85f8d157b5e7bcd4b32b54d564542570a9eb20416": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "tradeId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "orderId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "ticker",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "trader1",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "trader2",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "date",
+              "type": "uint256"
+            }
+          ],
+          "name": "NewTrade",
+          "type": "event"
+        }
+      },
       "links": {},
-      "address": "0x21B71b364B117e8c7d543ecb01521C7A0800D53F",
-      "transactionHash": "0x94f62f9f6c38574cdd41f6fe230c1b9b68bc450ec19f875be07f981927d2a97d"
+      "address": "0x83Ea8099Ce00F3AeA1ec55059dCA53c0a12Ee5E3",
+      "transactionHash": "0x79dfbc1b42a3226c949440768a2fff1e08f1f7c9482ee25ec86c0fbefea57556"
     }
   },
   "schemaVersion": "3.4.4",
-  "updatedAt": "2022-06-01T10:26:18.938Z",
+  "updatedAt": "2022-06-01T11:36:47.702Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
