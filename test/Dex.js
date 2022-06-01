@@ -1,4 +1,3 @@
-const { assertion } = require('@openzeppelin/test-helpers/src/expectRevert');
 const expectRevert = require('@openzeppelin/test-helpers/src/expectRevert');
 
 const Dai = artifacts.require('mocks/Dai.sol');
